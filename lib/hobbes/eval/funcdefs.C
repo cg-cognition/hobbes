@@ -357,7 +357,8 @@ const array<char>* formatTimeV(const array<char>* fmt, long tus) {
   int64_t us  = tus % (1000 * 1000);
   std::string sfmt = str::replace<char>(makeStdString(fmt), "%us", showUS(us));
   static char buf[256];
-  strftime(buf, sizeof(buf), sfmt.c_str(), localtime(reinterpret_cast<time_t*>(&s)));
+  struct tm tm_buf;
+  strftime(buf, sizeof(buf), sfmt.c_str(), localtime_r(reinterpret_cast<time_t*>(&s), &tm_buf));
   return makeString(buf);
 }
 

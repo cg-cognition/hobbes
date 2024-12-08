@@ -1,4 +1,3 @@
-
 #include <hobbes/util/os.H>
 #include "www.H"
 #include <fstream>
@@ -249,7 +248,8 @@ const cstr* formatJSTime(long x) {
   int64_t us = x % (1000 * 1000);
 
   char b[100];
-  strftime(b, sizeof(b), "%Y-%m-%d %H:%M:%S.", localtime(reinterpret_cast<time_t*>(&s)));
+  struct tm tm_buf;
+  strftime(b, sizeof(b), "%Y-%m-%d %H:%M:%S.", localtime_r(reinterpret_cast<time_t*>(&s), &tm_buf));
 
   return hobbes::makeString(b + hobbes::str::from(us));
 }

@@ -1,4 +1,3 @@
-
 #include <cstring>
 #include <fcntl.h>
 #include <hobbes/hobbes.H>
@@ -214,7 +213,8 @@ void dbglog(const std::string& msg) {
   if (machineREPLLogFD > 0) {
     char buf[256];
     time_t t = ::time(nullptr);
-    strftime(buf, sizeof(buf), "%H:%M:%S", localtime(reinterpret_cast<time_t*>(&t)));
+    struct tm tm_buf;
+    strftime(buf, sizeof(buf), "%H:%M:%S", localtime_r(reinterpret_cast<time_t*>(&t), &tm_buf));
 
     std::string logmsg = std::string(buf) + ": " + msg + "\n";
     auto rc = write(machineREPLLogFD, logmsg.c_str(), logmsg.size());

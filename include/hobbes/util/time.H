@@ -1,4 +1,3 @@
-
 #ifndef HOBBES_UTIL_TIME_HPP_INCLUDED
 #define HOBBES_UTIL_TIME_HPP_INCLUDED
 
@@ -125,7 +124,8 @@ inline std::string showTime(long x) {
   }
 
   static char buf[256];
-  strftime(buf, sizeof(buf), "%H:%M:%S", localtime(reinterpret_cast<time_t*>(&s)));
+  struct tm tm_buf;
+  strftime(buf, sizeof(buf), "%H:%M:%S", localtime_r(reinterpret_cast<time_t*>(&s), &tm_buf));
 
   std::ostringstream uss;
   uss << us;
@@ -162,7 +162,8 @@ inline long mkDateTime(int y, int mon, int d, int h, int min, int s, int u) {
 inline long timeFromDateTime(long x) {
   int64_t s  = x / (1000L * 1000L);
   int64_t us = x % (1000L * 1000L);
-  tm*     t  = localtime(reinterpret_cast<time_t*>(&s));
+  struct tm tm_buf;
+  tm* t = localtime_r(reinterpret_cast<time_t*>(&s), &tm_buf);
 
   if (t != nullptr) {
     return mkTime(t->tm_hour, t->tm_min, t->tm_sec, us);
@@ -212,7 +213,8 @@ inline std::string showDateTime(long x) {
   }
 
   static char buf[256];
-  strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%S", localtime(reinterpret_cast<time_t*>(&s)));
+  struct tm tm_buf;
+  strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%S", localtime_r(reinterpret_cast<time_t*>(&s), &tm_buf));
 
   std::ostringstream uss;
   uss << us;
