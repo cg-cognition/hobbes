@@ -1,4 +1,3 @@
-
 #ifndef HOBBES_UTIL_REGION_HPP_INCLUDED
 #define HOBBES_UTIL_REGION_HPP_INCLUDED
 
@@ -33,6 +32,16 @@ public:
   size_t used()      const; // how much of allocated memory is actually used?
   size_t wasted()    const; // how much of allocated memory is unavailable for use?
 
+  // check if a pointer belongs to this region's memory
+  bool contains(const void* ptr) const {
+    for (mempage* p = usedp; p != nullptr; p = p->succ) {
+      if (ptr >= p->base && ptr < static_cast<const char*>(p->base) + p->size) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   std::string show() const;
 
   // support catastrophic self-destruct on memory caps
@@ -50,7 +59,7 @@ private:
 
   mempage* newpage(mempage* succ, size_t sz);
   void allocpage(size_t sz);
-  
+
   void freepage(mempage* p);
   void freepages(mempage* p);
 };

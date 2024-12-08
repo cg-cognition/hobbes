@@ -974,7 +974,7 @@ void jitcc::bindGlobal(const std::string &vn, const MonoTypePtr &ty, void *x) {
   } else {
     if (hasPointerRep(ty) || isFileType(ty)) {
       // Ensure x has static lifetime before storing
-      if (!x || isStaticLifetime(x, this->globalData.base(), this->globalData.size())) {
+      if (!x || isStaticLifetime(x, this->globalData)) {
         void **p =
             reinterpret_cast<void **>(this->globalData.malloc(sizeof(void *)));
         *p = x;
@@ -1010,7 +1010,7 @@ void jitcc::bindGlobal(const std::string& vn, const MonoTypePtr& ty, void* x) {
   } else {
     if (hasPointerRep(ty) || isFileType(ty)) {
       // Ensure x has static lifetime before storing
-      if (!x || isStaticLifetime(x, this->globalData.base(), this->globalData.size())) {
+      if (!x || isStaticLifetime(x, this->globalData)) {
         void** p = reinterpret_cast<void**>(this->globalData.malloc(sizeof(void*)));
         *p = x;
         g.value = p;
