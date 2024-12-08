@@ -115,8 +115,10 @@ struct cwbitstream {
   // initialize a root node from a pair of model states (init and final)
   uint64_t initFresh(uint64_t initModel, uint64_t scratchModel) {
     size_t nullNode = findSpace(this->file, pagetype::data, 3*sizeof(size_t), sizeof(size_t));
-    size_t blankInitState[3] = {0,0,nullNode};
-    this->batchNode = blankInitState;
+    this->batchNode = reinterpret_cast<size_t*>(mapFileData(this->file, nullNode, 3*sizeof(size_t)));
+    this->batchNode[0] = 0;
+    this->batchNode[1] = 0;
+    this->batchNode[2] = nullNode;
     return stepBuffer(initModel, scratchModel);
   }
 
