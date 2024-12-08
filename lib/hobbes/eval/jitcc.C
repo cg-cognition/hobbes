@@ -1,9 +1,9 @@
-
 #include <hobbes/eval/func.H>
 #include <hobbes/util/llvm.H>
 #include <hobbes/eval/cexpr.H>
 #include <hobbes/eval/jitcc.H>
 #include <hobbes/hobbes.H>
+#include <hobbes/util/memory.H>
 #include <llvm/IR/Attributes.h>
 #include <llvm/IR/Constant.h>
 #include <llvm/IR/Constants.h>
@@ -973,10 +973,15 @@ void jitcc::bindGlobal(const std::string &vn, const MonoTypePtr &ty, void *x) {
     llvm::cantFail(orcjit->addExternalCallableSymbol(vn, value));
   } else {
     if (hasPointerRep(ty) || isFileType(ty)) {
-      void **p =
-          reinterpret_cast<void **>(this->globalData.malloc(sizeof(void *)));
-      *p = x;
-      value = p;
+      // Ensure x has static lifetime before storing
+      if (!x || isStaticLifetime(x, this->globalData.base(), this->globalData.size())) {
+        void **p =
+            reinterpret_cast<void **>(this->globalData.malloc(sizeof(void *)));
+        *p = x;
+        value = p;
+      } else {
+        throw std::runtime_error("Cannot bind global '" + vn + "' to non-static memory - potential stack address escape");
+      }
     }
 
     withContext([&](auto &) {
@@ -1004,9 +1009,14 @@ void jitcc::bindGlobal(const std::string& vn, const MonoTypePtr& ty, void* x) {
 #endif
   } else {
     if (hasPointerRep(ty) || isFileType(ty)) {
-      void** p = reinterpret_cast<void**>(this->globalData.malloc(sizeof(void*)));
-      *p = x;
-      g.value = p;
+      // Ensure x has static lifetime before storing
+      if (!x || isStaticLifetime(x, this->globalData.base(), this->globalData.size())) {
+        void** p = reinterpret_cast<void**>(this->globalData.malloc(sizeof(void*)));
+        *p = x;
+        g.value = p;
+      } else {
+        throw std::runtime_error("Cannot bind global '" + vn + "' to non-static memory - potential stack address escape");
+      }
     }
 
     g.ref.var = prepgv(new llvm::GlobalVariable(
